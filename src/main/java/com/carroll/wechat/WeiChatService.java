@@ -42,9 +42,9 @@ public class WeiChatService {
     private IWechatHandler handler;
 
     @Value("${wechat.appid}")
-    private String appid;//="wx32c667a40422cc51";
+    private String appid;
     @Value("${wechat.appsecret}")
-    private String appsecret;//="e2397e8e499d635108af86b2dadd40c5";
+    private String appsecret;
 
     @PostConstruct
     private void init(){
@@ -135,7 +135,7 @@ public class WeiChatService {
                     if(handler!=null){
                         return handler.handleSubscribe(requestMap);
                     }
-                    respContent = "谢谢您的关注，回复消息获取推荐信息！";
+                    respContent = "谢谢您的关注！";
 
                 }
                 // 取消订阅  

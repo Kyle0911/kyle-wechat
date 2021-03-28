@@ -1,10 +1,10 @@
 package com.carroll.wechat.utils;
 
 import com.carroll.wechat.pojo.*;
+import java.net.URLEncoder;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 
 /**
  * 菜单管理器类
@@ -53,17 +53,20 @@ public class MenuManager {
 //        btn11.setKey("info");
 
         ViewButton btn12 = new ViewButton();
-        btn12.setName("塔吊系统");
+        btn12.setName("xxx2塔吊系统");
         btn12.setType("view");
 //        btn12.setType("click");
 //        btn12.setKey("sale_service");
         String url="https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx7ac8c5ed9b048cc0&redirect_uri=";
         try {
-            url+= URLEncoder.encode("http://towercrane.aistave.com","utf-8");
+            url+= URLEncoder.encode("http://towercraneuat.aistave.com/weichat/incomeAuthCallback.json","utf-8");
+//            url+= URLEncoder.encode("http://towercrane.aistave.com/static/test.html","utf-8");
+//            url+= "http://towercrane.aistave.com/weichat/incomeAuthCallback.json";
         } catch (UnsupportedEncodingException e) {
+//        } catch (Exception e) {
             e.printStackTrace();
         }
-        url+="&response_type=code&scope=snsapi_base&state=wx&connect_redirect=1#wechat_redirect";
+        url+="&response_type=code&scope=snsapi_base&state=wx#wechat_redirect";
         btn12.setUrl(url);
 
 //        CommonButton btn13 = new CommonButton();
