@@ -24,6 +24,7 @@ public interface IWechatHandler {
     String handleSubscribe(Map<String, String> requestMap);
     String handleUnSubscribe(Map<String, String> requestMap);
     String handleClick(Map<String, String> requestMap);
+    String handleScan(Map<String, String> requestMap);
     /**
      * 从缓存中获取access token
      * @return

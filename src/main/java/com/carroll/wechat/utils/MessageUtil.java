@@ -89,6 +89,11 @@ public class MessageUtil {
     public static final String EVENT_TYPE_CLICK = "CLICK";
 
     /**
+     * 事件类型：SCAN(扫码事件)
+     */
+    public static final String EVENT_TYPE_SCAN = "SCAN";
+
+    /**
      * 群发消息类型：文本
      */
     public static final String SEND_MESSAGE_TYPE_TEXT = "text";
