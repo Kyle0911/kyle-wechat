@@ -1,9 +1,12 @@
 package com.carroll.wechat;
 
 import com.carroll.wechat.pojo.AccessTokenAndTicket;
+import com.carroll.wechat.response.Article;
+import com.carroll.wechat.response.NewsMessage;
 import com.carroll.wechat.response.TextMessage;
 import com.carroll.wechat.utils.MessageUtil;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -73,5 +76,16 @@ public class BaseWechatHandler implements IWechatHandler {
         textMessage.setMsgType(MessageUtil.RESP_MESSAGE_TYPE_TEXT);
         textMessage.setContent(msg);
         return MessageUtil.textMessageToXml(textMessage);
+    }
+
+    public String generateImageMessagXml(List<Article> articles, String fromUserName, String toUserName){
+        NewsMessage message = new NewsMessage();
+        message.setToUserName(fromUserName);
+        message.setFromUserName(toUserName);
+        message.setCreateTime(System.currentTimeMillis());
+        message.setMsgType(MessageUtil.RESP_MESSAGE_TYPE_NEWS);
+        message.setArticleCount(1);
+        message.setArticles(articles);
+        return MessageUtil.newsMessageToXml(message);
     }
 }

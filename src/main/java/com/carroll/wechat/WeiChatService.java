@@ -87,7 +87,7 @@ public class WeiChatService {
 //            textMessage.setFuncFlag(0);
 
             // 文本消息  
-            if (msgType.equals(MessageUtil.REQ_MESSAGE_TYPE_TEXT)) {
+            if (msgType.equalsIgnoreCase(MessageUtil.REQ_MESSAGE_TYPE_TEXT)) {
                 if(handler!=null){
                     return handler.handleTextMsg(requestMap);
                 }
@@ -99,39 +99,39 @@ public class WeiChatService {
 
             }
             // 图片消息  
-            else if (msgType.equals(MessageUtil.REQ_MESSAGE_TYPE_IMAGE)) {
+            else if (msgType.equalsIgnoreCase(MessageUtil.REQ_MESSAGE_TYPE_IMAGE)) {
                 if(handler!=null){
                     return handler.handleImageMsg(requestMap);
                 }
                 respContent = "您发送的是图片消息！";
             }
             // 地理位置消息  
-            else if (msgType.equals(MessageUtil.REQ_MESSAGE_TYPE_LOCATION)) {
+            else if (msgType.equalsIgnoreCase(MessageUtil.REQ_MESSAGE_TYPE_LOCATION)) {
                 if(handler!=null){
                     return handler.handleLocationMsg(requestMap);
                 }
                 respContent = "您发送的是地理位置消息！";
             }
             // 链接消息  
-            else if (msgType.equals(MessageUtil.REQ_MESSAGE_TYPE_LINK)) {
+            else if (msgType.equalsIgnoreCase(MessageUtil.REQ_MESSAGE_TYPE_LINK)) {
                 if(handler!=null){
                     return handler.handleLinkMsg(requestMap);
                 }
                 respContent = "您发送的是链接消息！";
             }
             // 音频消息  
-            else if (msgType.equals(MessageUtil.REQ_MESSAGE_TYPE_VOICE)) {
+            else if (msgType.equalsIgnoreCase(MessageUtil.REQ_MESSAGE_TYPE_VOICE)) {
                 if(handler!=null){
                     return handler.handleVoiceMsg(requestMap);
                 }
                 respContent = "您发送的是音频消息！";
             }
             // 事件推送  
-            else if (msgType.equals(MessageUtil.REQ_MESSAGE_TYPE_EVENT)) {
+            else if (msgType.equalsIgnoreCase(MessageUtil.REQ_MESSAGE_TYPE_EVENT)) {
                 // 事件类型  
                 String eventType = requestMap.get("Event");
                 // 订阅  
-                if (eventType.equals(MessageUtil.EVENT_TYPE_SUBSCRIBE)) {
+                if (eventType.equalsIgnoreCase(MessageUtil.EVENT_TYPE_SUBSCRIBE)) {
                     if(handler!=null){
                         return handler.handleSubscribe(requestMap);
                     }
@@ -139,21 +139,26 @@ public class WeiChatService {
 
                 }
                 // 取消订阅  
-                else if (eventType.equals(MessageUtil.EVENT_TYPE_UNSUBSCRIBE)) {
+                else if (eventType.equalsIgnoreCase(MessageUtil.EVENT_TYPE_UNSUBSCRIBE)) {
                     if(handler!=null){
                         return handler.handleUnSubscribe(requestMap);
                     }
                     // TODO 取消订阅后用户再收不到公众号发送的消息，因此不需要回复消息
                 }
                 // 自定义菜单点击事件  
-                else if (eventType.equals(MessageUtil.EVENT_TYPE_CLICK)) {
+                else if (eventType.equalsIgnoreCase(MessageUtil.EVENT_TYPE_CLICK)) {
                     if(handler!=null){
                         return handler.handleClick(requestMap);
                     }
                     respContent = "谢谢您的关注，暂不支持！";
-                } else if(eventType.equals(MessageUtil.EVENT_TYPE_SCAN)){
+                } else if(eventType.equalsIgnoreCase(MessageUtil.EVENT_TYPE_SCAN)){
                     if(handler!=null){
                         return handler.handleScan(requestMap);
+                    }
+                    respContent = "谢谢您的关注，暂不支持！";
+                } else if(eventType.equalsIgnoreCase(MessageUtil.REQ_MESSAGE_TYPE_LOCATION)){
+                    if(handler!=null){
+                        return handler.handleLocationMsg(requestMap);
                     }
                     respContent = "谢谢您的关注，暂不支持！";
                 }
