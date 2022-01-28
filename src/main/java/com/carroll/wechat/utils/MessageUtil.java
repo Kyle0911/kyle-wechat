@@ -170,22 +170,23 @@ public class MessageUtil {
      *
      * @date 2013-05-19
      */
-    private static XStream xstream = new XStream(new StaxDriver(){
-        public HierarchicalStreamWriter createWriter(Writer out){
-            return new PrettyPrintWriter(out){
+    private static XStream xstream = new XStream(new StaxDriver() {
+        public HierarchicalStreamWriter createWriter(Writer out) {
+            return new PrettyPrintWriter(out) {
                 boolean cdata = true;
 
                 @Override
-                public void startNode(String name, Class clazz){
+                public void startNode(String name, Class clazz) {
                     super.startNode(name, clazz);
                 }
+
                 @Override
-                protected void writeText(QuickWriter writer, String text){
-                    if(cdata){
+                protected void writeText(QuickWriter writer, String text) {
+                    if (cdata) {
                         writer.write("<![CDATA[");
                         writer.write(text);
                         writer.write("]]>");
-                    }else{
+                    } else {
                         writer.write(text);
                     }
                 }

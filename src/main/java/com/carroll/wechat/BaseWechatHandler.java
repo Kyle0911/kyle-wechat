@@ -68,7 +68,7 @@ public class BaseWechatHandler implements IWechatHandler {
 
     }
 
-    public String generateTextMessagXml(String msg,String fromUserName,String toUserName){
+    public static String generateTextMessagXml(String msg,String fromUserName,String toUserName){
         TextMessage textMessage = new TextMessage();
         textMessage.setToUserName(fromUserName);
         textMessage.setFromUserName(toUserName);
@@ -78,13 +78,13 @@ public class BaseWechatHandler implements IWechatHandler {
         return MessageUtil.textMessageToXml(textMessage);
     }
 
-    public String generateImageMessagXml(List<Article> articles, String fromUserName, String toUserName){
+    public static String generateNewsMessagXml(List<Article> articles, String fromUserName, String toUserName){
         NewsMessage message = new NewsMessage();
         message.setToUserName(fromUserName);
         message.setFromUserName(toUserName);
         message.setCreateTime(System.currentTimeMillis());
         message.setMsgType(MessageUtil.RESP_MESSAGE_TYPE_NEWS);
-        message.setArticleCount(1);
+        message.setArticleCount(articles.size());
         message.setArticles(articles);
         return MessageUtil.newsMessageToXml(message);
     }

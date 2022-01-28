@@ -3,9 +3,14 @@ package com.carroll.wechat.utils;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.carroll.wechat.pojo.AccessTokenAndTicket;
+import com.carroll.wechat.pojo.LoginCodeParseResult;
 import com.carroll.wechat.pojo.Menu;
 import lombok.extern.slf4j.Slf4j;
+import sun.misc.BASE64Decoder;
 
+import javax.crypto.Cipher;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
@@ -26,19 +31,24 @@ import java.util.Date;
  */
 @Slf4j
 public class WeixinUtil {
-//    private static Logger log = LoggerFactory.getLogger(WeixinUtil.class);
-
+    //    private static Logger log = LoggerFactory.getLogger(WeixinUtil.class);
+    public static String CBC_CIPHER_ALGORITHM = "AES/CBC/PKCS5Padding";
+    public static String ECB_CIPHER_ALGORITHM = "AES/ECB/PKCS5Padding";
+    private static final String KEY_ALGORITHM = "AES";
+    private static final String UTF8 = "UTF-8";
+    private static final String SECURERANDOM_MODE = "SHA1PRNG";
     // 获取access_token的接口地址（GET） 限200（次/天）
     public final static String access_token_url = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=APPID&secret=APPSECRET";
     public final static String ticket_token_url = "https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=ACCESS_TOKEN&type=TYPE";
     // 菜单创建（POST） 限100（次/天）
     public static String menu_create_url = "https://api.weixin.qq.com/cgi-bin/menu/create?access_token=ACCESS_TOKEN";
     public static String menu_delete_url = "https://api.weixin.qq.com/cgi-bin/menu/delete?access_token=ACCESS_TOKEN";
+    private static BASE64Decoder decoder = new BASE64Decoder();
 
     /**
      * 获取access_token
      *
-     * @param appid 凭证
+     * @param appid     凭证
      * @param appsecret 密钥
      * @return
      */
@@ -60,9 +70,9 @@ public class WeixinUtil {
                 log.error("获取token失败 errcode:{} errmsg:{}", jsonObject.getIntValue("errcode"), jsonObject.getString("errmsg"));
             }
         }
-        requestUrl=ticket_token_url.replace("ACCESS_TOKEN",accessToken.getToken());
-        requestUrl=requestUrl.replace("TYPE","jsapi");
-        jsonObject=httpRequest(requestUrl,"GET",null);
+        requestUrl = ticket_token_url.replace("ACCESS_TOKEN", accessToken.getToken());
+        requestUrl = requestUrl.replace("TYPE", "jsapi");
+        jsonObject = httpRequest(requestUrl, "GET", null);
         // 如果请求成功
         if (null != jsonObject) {
             try {
@@ -79,7 +89,7 @@ public class WeixinUtil {
     /**
      * 创建菜单
      *
-     * @param menu 菜单实例
+     * @param menu        菜单实例
      * @param accessToken 有效的access_token
      * @return 0表示成功，其他值表示失败
      */
@@ -103,13 +113,13 @@ public class WeixinUtil {
         return result;
     }
 
-    public static int deleteMenu(String accessToken){
+    public static int deleteMenu(String accessToken) {
         int result = 0;
 
         // 拼装创建菜单的url
         String url = menu_delete_url.replace("ACCESS_TOKEN", accessToken);
         // 调用接口创建菜单
-        JSONObject jsonObject = httpRequest(url, "GET","{}");
+        JSONObject jsonObject = httpRequest(url, "GET", "{}");
 
         if (null != jsonObject) {
             if (0 != jsonObject.getIntValue("errcode")) {
@@ -124,17 +134,17 @@ public class WeixinUtil {
     /**
      * 发起https请求并获取结果
      *
-     * @param requestUrl 请求地址
+     * @param requestUrl    请求地址
      * @param requestMethod 请求方式（GET、POST）
-     * @param outputStr 提交的数据
-     * @return JSONObject(通过JSONObject.get(key)的方式获取json对象的属性值)
+     * @param outputStr     提交的数据
+     * @return JSONObject(通过JSONObject.get ( key)的方式获取json对象的属性值)
      */
     public static JSONObject httpRequest(String requestUrl, String requestMethod, String outputStr) {
         JSONObject jsonObject = null;
         StringBuffer buffer = new StringBuffer();
         try {
             // 创建SSLContext对象，并使用我们指定的信任管理器初始化
-            TrustManager[] tm = { new MyX509TrustManager() };
+            TrustManager[] tm = {new MyX509TrustManager()};
             SSLContext sslContext = SSLContext.getInstance("SSL", "SunJSSE");
             sslContext.init(null, tm, new java.security.SecureRandom());
             // 从上述SSLContext对象中得到SSLSocketFactory对象
@@ -171,7 +181,7 @@ public class WeixinUtil {
             while ((str = bufferedReader.readLine()) != null) {
                 buffer.append(str);
             }
-            log.debug("request result:"+buffer.toString());
+            log.debug("request result:" + buffer.toString());
             bufferedReader.close();
             inputStreamReader.close();
             // 释放资源
@@ -186,4 +196,68 @@ public class WeixinUtil {
         }
         return jsonObject;
     }
+
+    /**
+     * 校验登录凭证
+     *
+     * @param code
+     * @param appid
+     * @param appsecret
+     * @return
+     */
+    public static LoginCodeParseResult jscode2session(String code, String appid, String appsecret) {
+        try {
+            String url = String.format("https://api.weixin.qq.com/sns/jscode2session?appid=%s&secret=%s&js_code=%s&grant_type=authorization_code",
+                    appid,
+                    appsecret,
+                    code
+            );
+            JSONObject jsonObject = httpRequest(url, "GET", null);
+            String openIdKey = "openid";
+            String session_key = "session_key";
+            if (jsonObject.containsKey(openIdKey) && jsonObject.containsKey(session_key)) {
+                String miniOpenid = jsonObject.getString(openIdKey);
+                String sessionKey = jsonObject.getString(session_key);
+                return new LoginCodeParseResult(miniOpenid, sessionKey);
+            } else {
+                log.error("登录凭证校验失败：{}", jsonObject.toJSONString());
+                return null;
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return null;
+        }
+    }
+
+    /**
+     * 微信敏感信息解密
+     *
+     * @param content   加密内容
+     * @param skey  密钥
+     * @param ivParameter   对称解密算法初始向量
+     * @return
+     */
+    public static String weixinDecrypt(String content, String skey, String ivParameter) {
+        try {
+            // 根据微信文档要求需要把 密文、密钥、iv 使用BASE64进行解码
+            byte[] keyByte = new BASE64Decoder().decodeBuffer(skey);
+            byte[] contentByte = decoder.decodeBuffer(content);
+            byte[] ivByte = decoder.decodeBuffer(ivParameter);
+            // 生成密码
+            SecretKeySpec keySpec = new SecretKeySpec(keyByte, KEY_ALGORITHM);
+            // 生成IvParameterSpec
+            IvParameterSpec iv = new IvParameterSpec(ivByte);
+            // 初始化解密 指定模式 AES/CBC/PKCS5Padding
+            Cipher cipher = Cipher.getInstance(CBC_CIPHER_ALGORITHM);
+            // 指定解密模式 传入密码 iv
+            cipher.init(Cipher.DECRYPT_MODE, keySpec, iv);
+            // 解密
+            byte[] result = cipher.doFinal(contentByte);
+            return new String(result, UTF8);
+        } catch (Exception ex) {
+            log.error("【解密错误】{}", ex.getMessage());
+            return null;
+        }
+    }
+
 }
