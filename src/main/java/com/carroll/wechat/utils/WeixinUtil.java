@@ -3,6 +3,7 @@ package com.carroll.wechat.utils;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.carroll.wechat.pojo.AccessTokenAndTicket;
+import com.carroll.wechat.pojo.AccessTokenInfo;
 import com.carroll.wechat.pojo.LoginCodeParseResult;
 import com.carroll.wechat.pojo.Menu;
 import lombok.extern.slf4j.Slf4j;
@@ -43,6 +44,7 @@ public class WeixinUtil {
     // 菜单创建（POST） 限100（次/天）
     public static String menu_create_url = "https://api.weixin.qq.com/cgi-bin/menu/create?access_token=ACCESS_TOKEN";
     public static String menu_delete_url = "https://api.weixin.qq.com/cgi-bin/menu/delete?access_token=ACCESS_TOKEN";
+    private static final String GEt_ACCESS_TOKEN_URL = "https://api.weixin.qq.com/sns/oauth2/access_token?appid=APPID&secret=SECRET&code=CODE&grant_type=authorization_code";
     private static BASE64Decoder decoder = new BASE64Decoder();
 
     /**
@@ -230,11 +232,38 @@ public class WeixinUtil {
     }
 
     /**
+     * 根据网页授权code获取accessToken
+     *
+     * @param code
+     * @param appId
+     * @param appSecret
+     * @return
+     */
+    public static AccessTokenInfo authcode2AccessToken(String code, String appId, String appSecret) {
+
+        String url = GEt_ACCESS_TOKEN_URL.replace("APPID", appId).replace("SECRET", appSecret);
+        url = url.replace("CODE", code);
+        JSONObject accessToken = WeixinUtil.httpRequest(url, "GET", "");
+        if (accessToken == null || accessToken.containsKey("errcode")) {
+            return null;
+        } else {
+            AccessTokenInfo accessTokenInfo = new AccessTokenInfo();
+            accessTokenInfo.setAccessToken(accessToken.getString("access_token"));
+            accessTokenInfo.setExpiresIn(accessToken.getLong("expires_in"));
+            accessTokenInfo.setRefreshToken(accessToken.getString("refresh_token"));
+            accessTokenInfo.setOpenid(accessToken.getString("openid"));
+            accessTokenInfo.setScope(accessToken.getString("scope"));
+            return accessTokenInfo;
+        }
+
+    }
+
+    /**
      * 微信敏感信息解密
      *
-     * @param content   加密内容
-     * @param skey  密钥
-     * @param ivParameter   对称解密算法初始向量
+     * @param content     加密内容
+     * @param skey        密钥
+     * @param ivParameter 对称解密算法初始向量
      * @return
      */
     public static String weixinDecrypt(String content, String skey, String ivParameter) {
