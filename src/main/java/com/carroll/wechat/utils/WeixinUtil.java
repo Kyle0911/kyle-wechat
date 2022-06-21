@@ -22,7 +22,10 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.ConnectException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * 公众平台通用接口工具类
@@ -287,6 +290,34 @@ public class WeixinUtil {
             log.error("【解密错误】{}", ex.getMessage());
             return null;
         }
+    }
+
+
+    public static String sha1Sign(Map<String, String> paramsMap) {
+        return StringUtils.sha1Encrypt(sortParams(paramsMap));
+    }
+
+    /**
+     * 根据参数名称对参数进行字典排序
+     *
+     * @param paramsMap
+     * @return
+     */
+    private static String sortParams(Map<String, String> paramsMap) {
+        Set<String> keySet = paramsMap.keySet();
+        String[] keyArray = (String[]) keySet.toArray(new String[keySet.size()]);
+        Arrays.sort(keyArray);
+        StringBuilder sb = new StringBuilder();
+        String[] var6 = keyArray;
+        int length = keyArray.length;
+
+        for (int i = 0; i < length; ++i) {
+            String k = var6[i];
+            if (!k.equals("sign") && (paramsMap.get(k)).trim().length() > 0) {
+                sb.append(k).append("=").append((paramsMap.get(k)).trim()).append("&");
+            }
+        }
+        return sb.substring(0, sb.lastIndexOf("&"));
     }
 
 }
