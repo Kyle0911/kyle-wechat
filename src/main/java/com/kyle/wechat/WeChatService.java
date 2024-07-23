@@ -31,7 +31,7 @@ import java.util.Map;
 @Service
 @Slf4j
 @Data
-public class WeiChatService {
+public class WeChatService {
 
     private static final String SEND_URL_BY_OPENID = "https://api.weixin.qq.com/cgi-bin/message/mass/send?access_token=ACCESS_TOKEN";
     private static final String SEND_URL_BY_TEMPLATE = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=ACCESS_TOKEN";
