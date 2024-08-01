@@ -8,7 +8,7 @@ import com.kyle.wechat.pojo.send.SendResult;
 import com.kyle.wechat.response.TextMessage;
 import com.kyle.wechat.utils.MessageUtil;
 import com.kyle.wechat.utils.StringUtils;
-import com.kyle.wechat.utils.WeixinUtil;
+import com.kyle.wechat.utils.WechatUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -189,7 +189,7 @@ public class WeChatService {
         message.setMsgtype(MessageUtil.SEND_MESSAGE_TYPE_TEXT);
         AccessTokenAndTicket accessToken = getAccessToken();
         String url = SEND_URL_BY_OPENID.replace("ACCESS_TOKEN", accessToken.getToken());
-        JSONObject obj = WeixinUtil.httpRequest(url, "POST", StringUtils.toJson(message));
+        JSONObject obj = WechatUtil.httpRequest(url, "POST", StringUtils.toJson(message));
         SendResult result = null;
         try {
             result = obj == null ? null : JSON.parseObject(obj.toJSONString(), SendResult.class);
@@ -209,7 +209,7 @@ public class WeChatService {
     public SendResult sendTemplateMessage(MessageTemplate template) throws Exception {
         AccessTokenAndTicket accessToken = getAccessToken();
         String url = SEND_URL_BY_TEMPLATE.replace("ACCESS_TOKEN", accessToken.getToken());
-        JSONObject obj = WeixinUtil.httpRequest(url, "POST", StringUtils.toJson(template));
+        JSONObject obj = WechatUtil.httpRequest(url, "POST", StringUtils.toJson(template));
         SendResult result = null;
         try {
             result = obj == null ? null : JSON.parseObject(obj.toJSONString(), SendResult.class);
@@ -229,12 +229,12 @@ public class WeChatService {
             token = handler.getSavedAccessToken();
         }
         if (token == null || StringUtils.isNullOrEmpty(token.getToken()) || StringUtils.isNullOrEmpty(token.getJsTicket())) {
-            token = WeixinUtil.getAccessToken(appid, appsecret);
+            token = WechatUtil.getAccessToken(appid, appsecret);
             if(handler!=null){
                 handler.saveAccessTokenAndTicket(token);
             }
         } else if (System.currentTimeMillis() - token.getCreateTime().getTime() > 7000 * 1000) {
-            token = WeixinUtil.getAccessToken(appid, appsecret);
+            token = WechatUtil.getAccessToken(appid, appsecret);
             if(handler!=null){
                 handler.saveAccessTokenAndTicket(token);
             }

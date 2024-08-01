@@ -20,4 +20,6 @@ public class LoginCodeParseResult {
     private String openId;
 
     private String sessionKey;
+
+    private String unionId;
 }

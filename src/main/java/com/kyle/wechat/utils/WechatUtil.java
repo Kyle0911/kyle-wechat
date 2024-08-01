@@ -34,7 +34,7 @@ import java.util.Set;
  * @date 2013-08-09
  */
 @Slf4j
-public class WeixinUtil {
+public class WechatUtil {
     //    private static Logger log = LoggerFactory.getLogger(WeixinUtil.class);
     public static String CBC_CIPHER_ALGORITHM = "AES/CBC/PKCS5Padding";
     public static String ECB_CIPHER_ALGORITHM = "AES/ECB/PKCS5Padding";
@@ -220,10 +220,12 @@ public class WeixinUtil {
             JSONObject jsonObject = httpRequest(url, "GET", null);
             String openIdKey = "openid";
             String session_key = "session_key";
+            String unionidKey = "unionid";
             if (jsonObject.containsKey(openIdKey) && jsonObject.containsKey(session_key)) {
                 String miniOpenid = jsonObject.getString(openIdKey);
                 String sessionKey = jsonObject.getString(session_key);
-                return new LoginCodeParseResult(miniOpenid, sessionKey);
+                String unionid = jsonObject.getString(unionidKey);
+                return new LoginCodeParseResult(miniOpenid, sessionKey, unionid);
             } else {
                 log.error("登录凭证校验失败：{}", jsonObject.toJSONString());
                 return null;
@@ -246,7 +248,7 @@ public class WeixinUtil {
 
         String url = GEt_ACCESS_TOKEN_URL.replace("APPID", appId).replace("SECRET", appSecret);
         url = url.replace("CODE", code);
-        JSONObject accessToken = WeixinUtil.httpRequest(url, "GET", "");
+        JSONObject accessToken = WechatUtil.httpRequest(url, "GET", "");
         if (accessToken == null || accessToken.containsKey("errcode")) {
             return null;
         } else {

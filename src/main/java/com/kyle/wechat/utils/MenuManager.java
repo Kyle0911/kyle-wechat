@@ -26,13 +26,13 @@ public class MenuManager {
         String appSecret = "718706e2b3fa19a175e8b4a1f9a532f4";
 
         // 调用接口获取access_token
-        AccessTokenAndTicket at = WeixinUtil.getAccessToken(appId, appSecret);
+        AccessTokenAndTicket at = WechatUtil.getAccessToken(appId, appSecret);
 
         if (null != at) {
             // 调用接口创建菜单
             int result = 0;
-            WeixinUtil.deleteMenu(at.getToken());
-            result = WeixinUtil.createMenu(getMenu(), at.getToken());
+            WechatUtil.deleteMenu(at.getToken());
+            result = WechatUtil.createMenu(getMenu(), at.getToken());
 
 
 
