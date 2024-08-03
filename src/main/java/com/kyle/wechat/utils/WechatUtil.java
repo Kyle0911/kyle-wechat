@@ -2,10 +2,7 @@ package com.kyle.wechat.utils;
 
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
-import com.kyle.wechat.pojo.AccessTokenAndTicket;
-import com.kyle.wechat.pojo.AccessTokenInfo;
-import com.kyle.wechat.pojo.LoginCodeParseResult;
-import com.kyle.wechat.pojo.Menu;
+import com.kyle.wechat.pojo.*;
 import lombok.extern.slf4j.Slf4j;
 import sun.misc.BASE64Decoder;
 
@@ -22,10 +19,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.ConnectException;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * 公众平台通用接口工具类
@@ -48,6 +42,7 @@ public class WechatUtil {
     public static String menu_create_url = "https://api.weixin.qq.com/cgi-bin/menu/create?access_token=ACCESS_TOKEN";
     public static String menu_delete_url = "https://api.weixin.qq.com/cgi-bin/menu/delete?access_token=ACCESS_TOKEN";
     private static final String GEt_ACCESS_TOKEN_URL = "https://api.weixin.qq.com/sns/oauth2/access_token?appid=APPID&secret=SECRET&code=CODE&grant_type=authorization_code";
+    private static final String GEt_USER_INFO_URL = "https://api.weixin.qq.com/cgi-bin/user/info?access_token=ACCESS_TOKEN&openid=OPENID&lang=zh_CN";
     private static BASE64Decoder decoder = new BASE64Decoder();
 
     /**
@@ -218,6 +213,7 @@ public class WechatUtil {
                     code
             );
             JSONObject jsonObject = httpRequest(url, "GET", null);
+            log.debug("jscode2session result:{}", jsonObject.toJSONString());
             String openIdKey = "openid";
             String session_key = "session_key";
             String unionidKey = "unionid";
@@ -261,6 +257,17 @@ public class WechatUtil {
             return accessTokenInfo;
         }
 
+    }
+
+    public static UserInfo getUserInfo(String openId, String accessToken) {
+
+        String url = GEt_USER_INFO_URL.replace("ACCESS_TOKEN", accessToken).replace("OPENID", openId);
+        JSONObject json = WechatUtil.httpRequest(url, "GET", "");
+        UserInfo userInfo = new UserInfo();
+        userInfo.setOpenId(openId);
+        userInfo.setUnionId(json.getString("unionid"));
+        userInfo.setRemark(json.getString("remark"));
+        return userInfo;
     }
 
     /**
