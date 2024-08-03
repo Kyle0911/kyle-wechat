@@ -12,5 +12,6 @@ public class MessageTemplate {
     private String touser;
     private String template_id;
     private String url;
+    private TemplateMiniProgram miniprogram;
     private Map<String,TemplateDataItem> data;
 }

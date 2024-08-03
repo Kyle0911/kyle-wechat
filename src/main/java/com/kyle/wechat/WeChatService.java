@@ -47,8 +47,8 @@ public class WeChatService {
     private String appsecret;
 
     @PostConstruct
-    private void init(){
-        if(handler==null){
+    private void init() {
+        if (handler == null) {
             log.warn("请自定义消息处理接口:com.kyle.wechat.IWechatHandler");
         }
     }
@@ -88,10 +88,10 @@ public class WeChatService {
 
             // 文本消息  
             if (msgType.equalsIgnoreCase(MessageUtil.REQ_MESSAGE_TYPE_TEXT)) {
-                if(handler!=null){
+                if (handler != null) {
                     return handler.handleTextMsg(requestMap);
                 }
-                respContent = "您发送的是文本消息！:"+requestMap.get("Content");
+                respContent = "您发送的是文本消息！:" + requestMap.get("Content");
 //                respMessage = MessageUtil.newsMessageToXml(sendRecommendAndHistory(fromUserName,toUserName));
                 log.debug("消息:{}", respMessage);
 
@@ -100,28 +100,28 @@ public class WeChatService {
             }
             // 图片消息  
             else if (msgType.equalsIgnoreCase(MessageUtil.REQ_MESSAGE_TYPE_IMAGE)) {
-                if(handler!=null){
+                if (handler != null) {
                     return handler.handleImageMsg(requestMap);
                 }
                 respContent = "您发送的是图片消息！";
             }
             // 地理位置消息  
             else if (msgType.equalsIgnoreCase(MessageUtil.REQ_MESSAGE_TYPE_LOCATION)) {
-                if(handler!=null){
+                if (handler != null) {
                     return handler.handleLocationMsg(requestMap);
                 }
                 respContent = "您发送的是地理位置消息！";
             }
             // 链接消息  
             else if (msgType.equalsIgnoreCase(MessageUtil.REQ_MESSAGE_TYPE_LINK)) {
-                if(handler!=null){
+                if (handler != null) {
                     return handler.handleLinkMsg(requestMap);
                 }
                 respContent = "您发送的是链接消息！";
             }
             // 音频消息  
             else if (msgType.equalsIgnoreCase(MessageUtil.REQ_MESSAGE_TYPE_VOICE)) {
-                if(handler!=null){
+                if (handler != null) {
                     return handler.handleVoiceMsg(requestMap);
                 }
                 respContent = "您发送的是音频消息！";
@@ -132,7 +132,7 @@ public class WeChatService {
                 String eventType = requestMap.get("Event");
                 // 订阅  
                 if (eventType.equalsIgnoreCase(MessageUtil.EVENT_TYPE_SUBSCRIBE)) {
-                    if(handler!=null){
+                    if (handler != null) {
                         return handler.handleSubscribe(requestMap);
                     }
                     respContent = "谢谢您的关注！";
@@ -140,24 +140,24 @@ public class WeChatService {
                 }
                 // 取消订阅  
                 else if (eventType.equalsIgnoreCase(MessageUtil.EVENT_TYPE_UNSUBSCRIBE)) {
-                    if(handler!=null){
+                    if (handler != null) {
                         return handler.handleUnSubscribe(requestMap);
                     }
                     // TODO 取消订阅后用户再收不到公众号发送的消息，因此不需要回复消息
                 }
                 // 自定义菜单点击事件  
                 else if (eventType.equalsIgnoreCase(MessageUtil.EVENT_TYPE_CLICK)) {
-                    if(handler!=null){
+                    if (handler != null) {
                         return handler.handleClick(requestMap);
                     }
                     respContent = "谢谢您的关注，暂不支持！";
-                } else if(eventType.equalsIgnoreCase(MessageUtil.EVENT_TYPE_SCAN)){
-                    if(handler!=null){
+                } else if (eventType.equalsIgnoreCase(MessageUtil.EVENT_TYPE_SCAN)) {
+                    if (handler != null) {
                         return handler.handleScan(requestMap);
                     }
                     respContent = "谢谢您的关注，暂不支持！";
-                } else if(eventType.equalsIgnoreCase(MessageUtil.REQ_MESSAGE_TYPE_LOCATION)){
-                    if(handler!=null){
+                } else if (eventType.equalsIgnoreCase(MessageUtil.REQ_MESSAGE_TYPE_LOCATION)) {
+                    if (handler != null) {
                         return handler.handleLocationMsg(requestMap);
                     }
                     respContent = "谢谢您的关注，暂不支持！";
@@ -210,6 +210,7 @@ public class WeChatService {
         AccessTokenAndTicket accessToken = getAccessToken();
         String url = SEND_URL_BY_TEMPLATE.replace("ACCESS_TOKEN", accessToken.getToken());
         JSONObject obj = WechatUtil.httpRequest(url, "POST", StringUtils.toJson(template));
+        log.debug("send weichat result:", obj == null ? "null" : obj.toJSONString());
         SendResult result = null;
         try {
             result = obj == null ? null : JSON.parseObject(obj.toJSONString(), SendResult.class);
@@ -221,21 +222,22 @@ public class WeChatService {
 
     /**
      * 获取 AccessToken
+     *
      * @return
      */
     public AccessTokenAndTicket getAccessToken() {
         AccessTokenAndTicket token = null;
-        if(handler!=null){
+        if (handler != null) {
             token = handler.getSavedAccessToken();
         }
         if (token == null || StringUtils.isNullOrEmpty(token.getToken()) || StringUtils.isNullOrEmpty(token.getJsTicket())) {
             token = WechatUtil.getAccessToken(appid, appsecret);
-            if(handler!=null){
+            if (handler != null) {
                 handler.saveAccessTokenAndTicket(token);
             }
         } else if (System.currentTimeMillis() - token.getCreateTime().getTime() > 7000 * 1000) {
             token = WechatUtil.getAccessToken(appid, appsecret);
-            if(handler!=null){
+            if (handler != null) {
                 handler.saveAccessTokenAndTicket(token);
             }
         }
